@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import datetime
 
 file_path = './data/Online Retail Dataset.csv'
 
@@ -35,17 +34,10 @@ if __name__ == "__main__":
     tgt_df = df2[df2['CNT'] > 100].sort_values('CNT', ascending=False)[0:10]
 
     for index, row in tgt_df.iterrows():
-        plt.title(row['Description'] + '(Invoice Count : {})'.format(row['CNT']))
         print(row['Description'])
         tf1 = df[(df['Description'] == row['Description']) & (df['Quantity'] > 0)]
         tf1.plot(x='YYYYMM', y='Quantity')
+        plt.title(row['Description'] + '(Invoice Count : {})'.format(row['CNT']))
         plt.show()
-
-    # Quantity > 0 환불 데이터 제외..
-    print(df[(df['Description'] == 'WHITE HANGING HEART T-LIGHT HOLDER') & (df['Quantity'] > 0)])
-
-    tf1 = df[(df['Description'] == 'WHITE HANGING HEART T-LIGHT HOLDER') & (df['Quantity'] > 0)]
-    tf1.plot(x='YYYYMM', y='Quantity')
-    tf1.show()
 
     # 기존 Thesis 와 비교하여 데이터 확정
