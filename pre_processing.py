@@ -30,6 +30,9 @@ if __name__ == "__main__":
     df2.reset_index(drop=True, inplace=True)
     df2.rename(columns={'InvoiceNo':'CNT'}, inplace=True)
 
+    # 주문횟수 기술 통계량
+    df2['CNT'].describe()
+
     # 상품 주문 횟수가 100 개 이상 중 TOP10
     tgt_df = df2[df2['CNT'] > 100].sort_values('CNT', ascending=False)[0:10]
 
