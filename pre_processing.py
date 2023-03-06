@@ -26,6 +26,12 @@ if __name__ == "__main__":
     # Description(상품명) unique 4221 개..
     print(len(df['Description'].unique()))
 
+    # 고객 ID unique 4373 건
+    print(len(df['CustomerID'].unique()))
+
+    # Country Unique 38 건
+    print(len(df['Country'].unique()))
+
     # Description(상품명) 별 주문 횟수(청구서 번호 기준)
     df2 = df.groupby('Description')['InvoiceNo'].count().reset_index()
     df2.reset_index(drop=True, inplace=True)
@@ -47,5 +53,3 @@ if __name__ == "__main__":
     tf1 = df[(df['Description'] == 'WHITE HANGING HEART T-LIGHT HOLDER') & (df['Quantity'] > 0)]
     tf1.plot(x='YYYYMM', y='Quantity')
     tf1.show()
-
-    # 기존 Thesis 와 비교하여 데이터 확정
