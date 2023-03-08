@@ -26,26 +26,22 @@ if __name__ == "__main__":
     # Description(상품명) unique 4221 개..
     print(len(df['Description'].unique()))
 
-    # Description(상품명) 별 주문 횟수(청구서 번호 기준)
+    # CustomerID(고객번호) unique 4373 개..
+    print(len(df['CustomerID'].unique()))
+
+    # Description(상품명) 별 주문 청구 횟수
     df2 = df.groupby('Description')['InvoiceNo'].count().reset_index()
     df2.reset_index(drop=True, inplace=True)
     df2.rename(columns={'InvoiceNo':'CNT'}, inplace=True)
 
-    # 상품 주문 횟수가 100 개 이상 중 TOP10
+    # 상품 주문청구 횟수가 100 개 이상 중 TOP10
     tgt_df = df2[df2['CNT'] > 100].sort_values('CNT', ascending=False)[0:10]
 
+    # 상품별 월별 주문 수량 PLOT
     for index, row in tgt_df.iterrows():
         plt.title(row['Description'] + '(Invoice Count : {})'.format(row['CNT']))
         print(row['Description'])
+        # Quantity > 0 환불 데이터 제외..
         tf1 = df[(df['Description'] == row['Description']) & (df['Quantity'] > 0)]
         tf1.plot(x='YYYYMM', y='Quantity')
         plt.show()
-
-    # Quantity > 0 환불 데이터 제외..
-    print(df[(df['Description'] == 'WHITE HANGING HEART T-LIGHT HOLDER') & (df['Quantity'] > 0)])
-
-    tf1 = df[(df['Description'] == 'WHITE HANGING HEART T-LIGHT HOLDER') & (df['Quantity'] > 0)]
-    tf1.plot(x='YYYYMM', y='Quantity')
-    tf1.show()
-
-    # 기존 Thesis 와 비교하여 데이터 확정
