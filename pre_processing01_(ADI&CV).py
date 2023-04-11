@@ -61,21 +61,23 @@ if __name__ == "__main__":
     df_adi_cv.loc[(df_adi_cv['ADI'] < 1.32) & (df_adi_cv['ADI'] > 0.0 ) & (df_adi_cv['CV'] >= 0.49),'Demand Pattern'] = 'Lumpy'
 
 
-    df_adi_cv_result = df_adi_cv[['Description','Demand Pattern']]
-
+    df_adi_cv_result = df_adi_cv[['Description','Demand Pattern', 'CNT']]
     df_adi_cv_result[~df_adi_cv_result['Demand Pattern'].isna()]
     print(df_adi_cv_result.groupby('Demand Pattern')['Description'].count())
 
     # 일정한 수량의 수요가 규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Smooth'].head())
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Smooth'].sort_values(by='CNT', ascending=False).head())
+    df_yyyymm[df_yyyymm['Description'] == 'QUEENS GUARD COFFEE MUG'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
 
     # 일정하지 않은 수량의 수요가 규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Erratic'].head())
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Erratic'].sort_values(by='CNT', ascending=False).head())
+    df_yyyymm[df_yyyymm['Description'] == 'TOAST ITS - HAPPY BIRTHDAY'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
 
     # 일정한 수량의 수요가 불규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Intermittent'].head())
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Intermittent'].sort_values(by='CNT', ascending=False).head())
+    df_yyyymm[df_yyyymm['Description'] == 'WHITE STITCHED CUSHION COVER'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
 
     # 일정하지 않은 수량의 수요가 불규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Lumpy'].head())
-
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Lumpy'].sort_values(by='CNT', ascending=False).head(20))
+    df_yyyymm[df_yyyymm['Description'] == 'BLACK/BLUE POLKADOT UMBRELLA'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
 
