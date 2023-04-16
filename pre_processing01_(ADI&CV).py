@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 file_path = './data/Online Retail Dataset.csv'
 
@@ -81,3 +82,9 @@ if __name__ == "__main__":
     print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Lumpy'].sort_values(by='CNT', ascending=False).head(20))
     df_yyyymm[df_yyyymm['Description'] == 'BLACK/BLUE POLKADOT UMBRELLA'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
 
+    df_final = pd.merge(df_yyyymm, df_adi_cv_result, on='Description', how='left')
+    df_final = df_final[['YYYYMM','Description','Quantity','Demand Pattern']]
+
+    print(df_final.info())
+    df_final.to_csv(r'./data/df_yyyymm01.csv')
+    print("done")
