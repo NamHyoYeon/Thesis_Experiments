@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 from sklearn.cluster import KMeans
 
@@ -80,4 +81,7 @@ if __name__ == "__main__":
     kmeans = KMeans(n_clusters=5)
     kmeans.fit(df_grouping[['Recency','Frequency','Monetary','First_Purchase','MAX_Amount','MIN_Amount','MEAN_Amount']])
     df_grouping['cluster'] = kmeans.labels_
-    print(df_grouping.head())
+    print(df_grouping.info())
+
+    df_grouping.to_csv('./data/df_grouping_customer.csv')
+    print("done")
