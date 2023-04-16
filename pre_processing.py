@@ -5,6 +5,7 @@ import datetime
 file_path = './data/Online Retail Dataset.csv'
 
 if __name__ == "__main__":
+    # 기본 데이터 분석
     df = pd.read_csv(file_path)
     df['UnitPrice'] = df['UnitPrice'].astype('int')
     df['CustomerID'] = df['CustomerID'].astype('str')
