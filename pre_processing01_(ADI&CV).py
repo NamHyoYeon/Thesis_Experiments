@@ -61,7 +61,6 @@ if __name__ == "__main__":
     df_adi_cv.loc[(df_adi_cv['ADI'] >= 1.32) & (df_adi_cv['CV'] < 0.49) & (df_adi_cv['CV'] > 0.0),'Demand Pattern'] = 'Intermittent'
     df_adi_cv.loc[(df_adi_cv['ADI'] < 1.32) & (df_adi_cv['ADI'] > 0.0 ) & (df_adi_cv['CV'] >= 0.49),'Demand Pattern'] = 'Lumpy'
 
-
     df_adi_cv_result = df_adi_cv[['Description','Demand Pattern', 'CNT']]
     df_adi_cv_result[~df_adi_cv_result['Demand Pattern'].isna()]
     print(df_adi_cv_result.groupby('Demand Pattern')['Description'].count())
