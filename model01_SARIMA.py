@@ -1,5 +1,7 @@
 import pandas as pd
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+import datetime
+import numpy as np
 
 file_path = './data/df_final.csv'
 
@@ -33,10 +35,13 @@ if __name__ == "__main__":
 
     # Description(상품) 별로 예측, 가장 마지막 달을 기준으로 train
     product_list = df_tgt['Description'].unique()
+    df_tgt['predict_Quantity'] = np.nan
 
-    print(df_tgt[df_tgt['Description'] == product_list[0]].index.max())
+    print(df_tgt.info())
 
+    i=0
     for product in product_list:
+        i = i+1
         max_index = df_tgt[df_tgt['Description'] == product].index.max()
         train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
         test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
@@ -54,5 +59,19 @@ if __name__ == "__main__":
              'Smooth']])
 
         df = forecast.to_frame()
-        print(df.info())
-        print(df.head())
+        df['max_index'] = max_index
+        df['product'] = product
+        df.columns = ['predict_Quantity','max_index','product']
+        predict_value = round(df.iloc[0,0],2)
+        ## 왜 업데이트가 안되지??
+        df_tgt[df_tgt['Description'] == product].loc[max_index, 'predict_Quantity'] = 0
+
+        if i >= 10:
+            print(predict_value)
+            print(df_tgt[df_tgt['Description'] == product].loc[max_index, 'Quantity'])
+            print(df_tgt[df_tgt['Description'] == product].loc[max_index,'predict_Quantity'])
+            break
+
+
+    print(type(df.iloc[0,0]))
+    print(df_tgt[df_tgt['predict_Quantity'].isna()])
