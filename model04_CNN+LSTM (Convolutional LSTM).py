@@ -1,47 +1,52 @@
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
 import datetime
 
-file_path = './data/Online Retail Dataset.csv'
+# plot packages
+import matplotlib.pyplot as plt
+
+# model packages
+
+
+# metrics for model
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_absolute_error
+
+file_path = './data/df_final.csv'
 
 if __name__ == "__main__":
     df = pd.read_csv(file_path)
-    df['UnitPrice'] = df['UnitPrice'].astype('int')
-    df['CustomerID'] = df['CustomerID'].astype('str')
-
     print(df.info())
 
-    df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
-    df['YYYY'] = df['InvoiceDate'].dt.year
-    df['MM'] = df['InvoiceDate'].dt.month
-    df['DD'] = df['InvoiceDate'].dt.day
-    df['YYYYMM'] = df['YYYY'].astype('str') + df['MM'].astype('str').apply(lambda x: str(x).zfill(2))
-
-    # 2010/01 ~ 2011/08  1년 8개월 치 데이터
-    print(df['YYYYMM'].unique())
-
-    # 전체 건수 542,014
+    # Demand Pattern 존재 하는 Row 만 필터링
+    df = df[~df['Demand Pattern'].isna()]
+    # 49,865 건
     print(df.info())
 
-    # Description(상품명) unique 4221 개..
-    print(len(df['Description'].unique()))
+    df['YYYYMM'] = df['YYYYMM'].astype(str)
+    df['YYYYMM'] = df['YYYYMM'].str[0:4] + '-' + df['YYYYMM'].str[4:6]
+    df['YYYYMM'] = pd.to_datetime(df['YYYYMM'], format='%Y/%m')
+    print(df.head())
 
-    # CustomerID(고객번호) unique 4373 개..
-    print(len(df['CustomerID'].unique()))
+    # One Hot Encoding
+    one_hot_encoded = pd.get_dummies(df['Demand Pattern'])
+    print(one_hot_encoded)
 
-    # Description(상품명) 별 주문 청구 횟수
-    df2 = df.groupby('Description')['InvoiceNo'].count().reset_index()
-    df2.reset_index(drop=True, inplace=True)
-    df2.rename(columns={'InvoiceNo':'CNT'}, inplace=True)
+    df = pd.concat([df, one_hot_encoded], axis=1)
+    print(df.info())
 
-    # 상품 주문청구 횟수가 100 개 이상 중 TOP10
-    tgt_df = df2[df2['CNT'] > 100].sort_values('CNT', ascending=False)[0:10]
+    # 변수 정하기
+    df_tgt = df[['YYYYMM', 'Description', 'Quantity', '0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster',
+                 'Erratic', 'Intermittent', 'Lumpy', 'Smooth']]
+    print(df_tgt.head())
+    df_tgt = df_tgt.set_index('YYYYMM')
 
-    # 상품별 월별 주문 수량 PLOT
-    for index, row in tgt_df.iterrows():
-        plt.title(row['Description'] + '(Invoice Count : {})'.format(row['CNT']))
-        print(row['Description'])
-        # Quantity > 0 환불 데이터 제외..
-        tf1 = df[(df['Description'] == row['Description']) & (df['Quantity'] > 0)]
-        tf1.plot(x='YYYYMM', y='Quantity')
-        plt.show()
+    print(df_tgt)
+
+    # Description(상품) 별로 예측, 가장 마지막 달을 기준으로 train
+    product_list = df_tgt['Description'].unique()
+    df_tgt['predict_Quantity'] = np.nan
+
+    print(df_tgt.info())

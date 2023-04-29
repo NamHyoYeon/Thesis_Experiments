@@ -1,12 +1,18 @@
 import pandas as pd
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-import datetime
 import numpy as np
+import datetime
+
+# plot packages
+import matplotlib.pyplot as plt
+
+# model packages
+from statsmodels.tsa.statespace.sarimax import SARIMAX
 
 # metrics for model
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_absolute_error
 
 file_path = './data/df_final.csv'
 
@@ -43,15 +49,43 @@ if __name__ == "__main__":
     df_tgt['predict_Quantity'] = np.nan
 
     print(df_tgt.info())
-
-    # 변수를 다 넣었을 때,
+    # 변수가 하나도 없을 때
     for product in product_list:
         max_index = df_tgt[df_tgt['Description'] == product].index.max()
         train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
         test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
         print(max_index)
 
-        # Fit an ARIMAX model to the training data
+        # Fit an SARIMAX model to the training data
+        model = SARIMAX(train['Quantity'], exog=None, order=(1, 0, 0))
+        result = model.fit()
+
+        # Make predictions for the test set
+        forecast = result.forecast(steps=len(test), exog=None)
+
+        df = forecast.to_frame()
+        df['max_index'] = max_index
+        df['product'] = product
+        df.columns = ['predict_Quantity','max_index','product']
+        predict_value = round(df.iloc[0,0],2)
+        df_tgt.loc[(df_tgt['Description'] == product) & (df_tgt.index == max_index), 'predict_Quantity'] = predict_value
+
+    df_final = df_tgt[~df_tgt['predict_Quantity'].isna()]
+    df_final['predict_Quantity'] = df_final['predict_Quantity'].astype('int64')
+
+    # RMSE 구하기
+    df_final['gap'] = (df_final['Quantity'] - df_final['predict_Quantity'])**2
+    rmse1 = np.sqrt(df_final['gap'].mean())
+    mae1 = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
+
+    # 변수를 다 넣었을 때
+    for product in product_list:
+        max_index = df_tgt[df_tgt['Description'] == product].index.max()
+        train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
+        test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
+        print(max_index)
+
+        # Fit an SARIMAX model to the training data
         model = SARIMAX(train['Quantity'], exog=train[
             ['0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster', 'Erratic', 'Intermittent', 'Lumpy',
              'Smooth']], order=(1, 0, 0))
@@ -74,22 +108,25 @@ if __name__ == "__main__":
 
     # RMSE 구하기
     df_final['gap'] = (df_final['Quantity'] - df_final['predict_Quantity'])**2
-    rmse1 = np.sqrt(df_final['gap'].mean())
-    print(rmse1)
+    rmse2 = np.sqrt(df_final['gap'].mean())
+    # MAE 구하기
+    mae2 = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
 
-    # 변수가 하나도 없을 때
+    # 고객 클러스터링 변수만 넣었을 때
     for product in product_list:
         max_index = df_tgt[df_tgt['Description'] == product].index.max()
         train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
         test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
         print(max_index)
 
-        # Fit an ARIMAX model to the training data
-        model = SARIMAX(train['Quantity'], exog=None, order=(1, 0, 0))
+        # Fit an SARIMAX model to the training data
+        model = SARIMAX(train['Quantity'], exog=train[
+            ['0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster']], order=(1, 0, 0))
         result = model.fit()
 
         # Make predictions for the test set
-        forecast = result.forecast(steps=len(test), exog=None)
+        forecast = result.forecast(steps=len(test), exog=test[
+            ['0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster']])
 
         df = forecast.to_frame()
         df['max_index'] = max_index
@@ -103,5 +140,40 @@ if __name__ == "__main__":
 
     # RMSE 구하기
     df_final['gap'] = (df_final['Quantity'] - df_final['predict_Quantity'])**2
-    rmse2 = np.sqrt(df_final['gap'].mean())
-    print(rmse2)
+    rmse3 = np.sqrt(df_final['gap'].mean())
+    # MAE 구하기
+    mae3 = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
+
+    # 상품 수요 패턴 변수만 넣었을 때
+    for product in product_list:
+        max_index = df_tgt[df_tgt['Description'] == product].index.max()
+        train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
+        test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
+        print(max_index)
+
+        # Fit an SARIMAX model to the training data
+        model = SARIMAX(train['Quantity'], exog=train[
+            ['Erratic', 'Intermittent', 'Lumpy',
+             'Smooth']], order=(1, 0, 0))
+        result = model.fit()
+
+        # Make predictions for the test set
+        forecast = result.forecast(steps=len(test), exog=test[
+            ['Erratic', 'Intermittent', 'Lumpy',
+             'Smooth']])
+
+        df = forecast.to_frame()
+        df['max_index'] = max_index
+        df['product'] = product
+        df.columns = ['predict_Quantity', 'max_index', 'product']
+        predict_value = round(df.iloc[0, 0], 2)
+        df_tgt.loc[(df_tgt['Description'] == product) & (df_tgt.index == max_index), 'predict_Quantity'] = predict_value
+
+    df_final = df_tgt[~df_tgt['predict_Quantity'].isna()]
+    df_final['predict_Quantity'] = df_final['predict_Quantity'].astype('int64')
+
+    # RMSE 구하기
+    df_final['gap'] = (df_final['Quantity'] - df_final['predict_Quantity']) ** 2
+    rmse4 = np.sqrt(df_final['gap'].mean())
+    # MAE 구하기
+    mae4 = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
