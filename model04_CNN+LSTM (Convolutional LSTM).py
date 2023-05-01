@@ -37,23 +37,25 @@ if __name__ == "__main__":
     bf = datetime.datetime.now()
 
     print(df.head())
-    df_test = df[df['Description'] == product_list[0]]
-    index_list = df_test.index.to_list
-    second = np.argsort(index_list)[-2]
-    third = np.argsort(index_list)[-3]
-    print(index_list)
-    print(index_list[second])
+    print(len(df[df['Description'] == product_list[1]]))
 
-    max_index = df_test.index.max()
-    second_index = index_list[second]
-    third_index = index_list[third]
+    # test code
+    df_test = df[df['Description'] == product_list[1]]
+    index_list = df_test.index.to_list()
+    max = index_list[-1]
+    second = index_list[-2]
+    third = index_list[-3]
 
-    train_data = df_test[:third_index]
-    val_data = df_test[second_index:second_index]
-    test_data = df_test[max_index:]
+    train_data = df_test[:third]
+    val_data = df_test[second:second]
+    test_data = df_test[max:]
 
+    print(train_data)
     print(val_data)
     print(test_data)
+
+    timestamp = len(df_test)
+    print(timestamp)
 
     # Define the model architecture
     model = Sequential()
