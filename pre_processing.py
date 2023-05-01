@@ -18,7 +18,7 @@ if __name__ == "__main__":
     df['DD'] = df['InvoiceDate'].dt.day
     df['YYYYMM'] = df['YYYY'].astype('str') + df['MM'].astype('str').apply(lambda x: str(x).zfill(2))
 
-    # 2010/01 ~ 2011/08  1년 8개월 치 데이터
+    # 2010/01 ~ 2011/12  2년 치 데이터
     print(df['YYYYMM'].unique())
 
     # 전체 건수 542,014

@@ -6,7 +6,11 @@ import datetime
 import matplotlib.pyplot as plt
 
 # model packages
-
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import ConvLSTM2D, Dense, Flatten
+from keras.optimizers import Adam
+from keras.callbacks import EarlyStopping
 
 # metrics for model
 from sklearn.metrics import mean_squared_error
@@ -14,39 +18,59 @@ from sklearn.metrics import r2_score
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_absolute_error
 
-file_path = './data/df_final.csv'
+file_path = './data/df_final_with_bf1mm.csv'
 
 if __name__ == "__main__":
+    pd.set_option('display.max_columns', None)
     df = pd.read_csv(file_path)
-    print(df.info())
 
-    # Demand Pattern 존재 하는 Row 만 필터링
-    df = df[~df['Demand Pattern'].isna()]
-    # 49,865 건
-    print(df.info())
-
-    df['YYYYMM'] = df['YYYYMM'].astype(str)
-    df['YYYYMM'] = df['YYYYMM'].str[0:4] + '-' + df['YYYYMM'].str[4:6]
-    df['YYYYMM'] = pd.to_datetime(df['YYYYMM'], format='%Y/%m')
+    # 전월 값이 있는 ROW 부터 모델에 사용
+    df = df[~df['Quantity_bf1mm'].isna()]
+    # float -> int
+    df[['Quantity_bf1mm','0_cluster_bf1mm','1_cluster_bf1mm','2_cluster_bf1mm','3_cluster_bf1mm','4_cluster_bf1mm']] = df[['Quantity_bf1mm','0_cluster_bf1mm','1_cluster_bf1mm','2_cluster_bf1mm','3_cluster_bf1mm','4_cluster_bf1mm']].astype(int)
+    df = df.set_index(['YYYYMM'])
+    df['predict_Quantity'] = np.nan
     print(df.head())
+    df.sort_values(['Description','YYYYMM'], inplace=True)
 
-    # One Hot Encoding
-    one_hot_encoded = pd.get_dummies(df['Demand Pattern'])
-    print(one_hot_encoded)
+    product_list = df['Description'].unique()
+    bf = datetime.datetime.now()
 
-    df = pd.concat([df, one_hot_encoded], axis=1)
-    print(df.info())
+    print(df.head())
+    df_test = df[df['Description'] == product_list[0]]
+    index_list = df_test.index.to_list
+    second = np.argsort(index_list)[-2]
+    third = np.argsort(index_list)[-3]
+    print(index_list)
+    print(index_list[second])
 
-    # 변수 정하기
-    df_tgt = df[['YYYYMM', 'Description', 'Quantity', '0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster',
-                 'Erratic', 'Intermittent', 'Lumpy', 'Smooth']]
-    print(df_tgt.head())
-    df_tgt = df_tgt.set_index('YYYYMM')
+    max_index = df_test.index.max()
+    second_index = index_list[second]
+    third_index = index_list[third]
 
-    print(df_tgt)
+    train_data = df_test[:third_index]
+    val_data = df_test[second_index:second_index]
+    test_data = df_test[max_index:]
 
-    # Description(상품) 별로 예측, 가장 마지막 달을 기준으로 train
-    product_list = df_tgt['Description'].unique()
-    df_tgt['predict_Quantity'] = np.nan
+    print(val_data)
+    print(test_data)
 
-    print(df_tgt.info())
+    # Define the model architecture
+    model = Sequential()
+    model.add(ConvLSTM2D(filters=64, kernel_size=(1, 3), activation='relu', input_shape=(None, rows, columns, features)))
+    model.add(Dense(units=1))
+
+    # Compile the model
+    model.compile(loss='mean_squared_error', optimizer='adam')
+
+    # Train the model
+    model.fit(train_data, train_labels, validation_data=(val_data, val_labels), epochs=10, batch_size=64)
+
+    # Evaluate the model
+    score = model.evaluate(test_data, test_labels, batch_size=64)
+
+    # Make predictions
+    predictions = model.predict(new_data)
+
+
+    af = datetime.datetime.now

@@ -48,6 +48,8 @@ if __name__ == "__main__":
     product_list = df_tgt['Description'].unique()
     df_tgt['predict_Quantity'] = np.nan
 
+    bf = datetime.datetime.now()
+
     print(df_tgt.info())
     # 변수가 하나도 없을 때
     for product in product_list:
@@ -177,3 +179,5 @@ if __name__ == "__main__":
     rmse4 = np.sqrt(df_final['gap'].mean())
     # MAE 구하기
     mae4 = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
+
+    af = datetime.datetime.now()
