@@ -16,6 +16,9 @@ from sklearn.metrics import mean_absolute_error
 
 file_path = './data/df_final_with_bf1mm.csv'
 
+def mean_absolute_percentage_error(y_true, y_pred):
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
 if __name__ == "__main__":
     pd.set_option('display.max_columns', None)
     df = pd.read_csv(file_path)
@@ -32,31 +35,7 @@ if __name__ == "__main__":
     product_list = df['Description'].unique()
     bf = datetime.datetime.now()
 
-    for p in product_list:
-        df_tgt = df[df['Description'] == p]
-        max_index = df_tgt.index.max()
-
-        if len(df_tgt) > 5:
-            target_variable = 'Quantity'
-            features = ['Quantity_bf1mm']
-
-            X_train = df_tgt[df_tgt['Description'] == p].loc[:max_index,features]
-            X_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, features]
-            y_train = df_tgt[df_tgt['Description'] == p].loc[:max_index,target_variable]
-            y_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, target_variable]
-
-            xgb = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
-            xgb.fit(X_train, y_train)
-
-            y_pred = xgb.predict(X_test)
-            print(y_pred)
-
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = y_pred[0]
-
-    df_val = df[~df['predict_Quantity'].isna()]
-    # MAE 구하기
-    mae1 = mean_absolute_error(df_val['Quantity'], df_val['predict_Quantity'])
-
+    # 1. 전월 quantity + 전월 clustering 값 모두 feature 로 사용
     for p in product_list:
         df_tgt = df[df['Description'] == p]
         max_index = df_tgt.index.max()
@@ -80,15 +59,20 @@ if __name__ == "__main__":
 
     df_val = df[~df['predict_Quantity'].isna()]
     # MAE 구하기
-    mae2 = mean_absolute_error(df_val['Quantity'], df_val['predict_Quantity'])
+    mae1_total = mean_absolute_error(df_val['Quantity'], df_val['predict_Quantity'])
+    mae1_Erratic = mean_absolute_error(df_val[df_val['Erratic'] == 1]['Quantity'], df_val[df_val['Erratic'] == 1]['predict_Quantity'])
+    mae1_Intermittent = mean_absolute_error(df_val[df_val['Intermittent'] == 1]['Quantity'], df_val[df_val['Intermittent'] == 1]['predict_Quantity'])
+    mae1_Lumpy = mean_absolute_error(df_val[df_val['Lumpy'] == 1]['Quantity'], df_val[df_val['Lumpy'] == 1]['predict_Quantity'])
+    mae1_Smooth = mean_absolute_error(df_val[df_val['Smooth'] == 1]['Quantity'], df_val[df_val['Smooth'] == 1]['predict_Quantity'])
 
+    # 2. 전월 quantity 만 feature 로 사용
     for p in product_list:
         df_tgt = df[df['Description'] == p]
         max_index = df_tgt.index.max()
 
         if len(df_tgt) > 5:
             target_variable = 'Quantity'
-            features = ['Quantity_bf1mm','Erratic', 'Intermittent', 'Lumpy', 'Smooth']
+            features = ['Quantity_bf1mm']
 
             X_train = df_tgt[df_tgt['Description'] == p].loc[:max_index,features]
             X_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, features]
@@ -104,34 +88,19 @@ if __name__ == "__main__":
             df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = y_pred[0]
 
     df_val = df[~df['predict_Quantity'].isna()]
+
     # MAE 구하기
-    mae3 = mean_absolute_error(df_val['Quantity'], df_val['predict_Quantity'])
+    mae2_total = mean_absolute_error(df_val['Quantity'], df_val['predict_Quantity'])
+    mae2_Erratic = mean_absolute_error(df_val[df_val['Erratic'] == 1]['Quantity'], df_val[df_val['Erratic'] == 1]['predict_Quantity'])
+    mae2_Intermittent = mean_absolute_error(df_val[df_val['Intermittent'] == 1]['Quantity'], df_val[df_val['Intermittent'] == 1]['predict_Quantity'])
+    mae2_Lumpy = mean_absolute_error(df_val[df_val['Lumpy'] == 1]['Quantity'], df_val[df_val['Lumpy'] == 1]['predict_Quantity'])
+    mae2_Smooth = mean_absolute_error(df_val[df_val['Smooth'] == 1]['Quantity'], df_val[df_val['Smooth'] == 1]['predict_Quantity'])
 
-    for p in product_list:
-        df_tgt = df[df['Description'] == p]
-        max_index = df_tgt.index.max()
+    # 예측 건수 확인
+    final_product_cnt = len(df_val['Description'].unique())
+    final_product_Erratic_cnt = len(df_val[df_val['Erratic'] == 1]['Description'].unique())
+    final_product_Intermittent_cnt = len(df_val[df_val['Intermittent'] == 1]['Description'].unique())
+    final_product_Lumpy_cnt = len(df_val[df_val['Lumpy'] == 1]['Description'].unique())
+    final_product_Smooth_cnt = len(df_val[df_val['Smooth'] == 1]['Description'].unique())
 
-        if len(df_tgt) > 5:
-            target_variable = 'Quantity'
-            features = ['Quantity_bf1mm', '0_cluster_bf1mm', '1_cluster_bf1mm', '2_cluster_bf1mm', '3_cluster_bf1mm', '4_cluster_bf1mm','Erratic', 'Intermittent', 'Lumpy', 'Smooth']
-
-            X_train = df_tgt[df_tgt['Description'] == p].loc[:max_index,features]
-            X_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, features]
-            y_train = df_tgt[df_tgt['Description'] == p].loc[:max_index,target_variable]
-            y_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, target_variable]
-
-            xgb = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
-            xgb.fit(X_train, y_train)
-
-            y_pred = xgb.predict(X_test)
-            print(y_pred)
-
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = y_pred[0]
-
-    df_val = df[~df['predict_Quantity'].isna()]
-    # MAE 구하기
-    mae4 = mean_absolute_error(df_val['Quantity'], df_val['predict_Quantity'])
-
-    af = datetime.datetime.now
-
-    print(df_val.head())
+    af = datetime.datetime.now()
