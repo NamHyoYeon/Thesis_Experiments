@@ -21,7 +21,11 @@ file_path = './data/df_final_with_bf1mm.csv'
 
 def create_dataset(dataset, look_back):
     dataX, dataY = [], []
+    print(len(dataset))
     for i in range(len(dataset)-look_back):
+        print(dataset[i:(i+look_back), :])
+        print(dataset[i + look_back, :])
+
         dataX.append(dataset[i:(i+look_back), :])
         dataY.append(dataset[i + look_back, :])
     return np.array(dataX), np.array(dataY)
@@ -47,8 +51,6 @@ if __name__ == "__main__":
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_data = scaler.fit_transform(df_test[['Quantity','0_cluster','1_cluster','2_cluster','3_cluster','4_cluster','Erratic','Intermittent','Lumpy','Smooth']])
 
-    print(int(0.8 * length))
-
     # train, test 데이터 만들기
     train_data = scaled_data[:int(0.8 * length), :]
     test_data = scaled_data[int(0.8 * length):, :]
@@ -64,15 +66,14 @@ if __name__ == "__main__":
     print(y_test.shape)
 
     # reshape, 차원 잘 맞추기 !! 어떻게 맞추어야 하나??
-    X_train = np.reshape(X_train, (16, 10, 1))
-    y_train = np.reshape(y_train, ())
-    X_test = np.reshape(X_test, (4, 5, 1))
+    X_train = np.reshape(X_train, (8, 20, 1))
 
 
+    print(X_train.shape[1])
 
     # 모델 생성
     model = Sequential()
-    model.add(LSTM(units=50, return_sequences=True, input_shape=(2, 10)))
+    model.add(LSTM(units=50, return_sequences=True, input_shape=(20, 1)))
     model.add(LSTM(units=50, return_sequences=True))
     model.add(LSTM(units=50))
     model.add(Dense(units=1))
@@ -82,12 +83,8 @@ if __name__ == "__main__":
     model.fit(X_train, y_train, epochs=100, batch_size=1)
 
     # 다음 값 예측
-    # train_predict = model.predict(X_train)
-    # test_predict = model.predict(X_test)
-    # train_predict = scaler.inverse_transform(train_predict)
-    # y_train = scaler.inverse_transform(y_train.reshape(-1, 1))
-    # test_predict = scaler.inverse_transform(test_predict)
-    # y_test = scaler.inverse_transform(y_test.reshape(-1, 1))
-    #
-    # rmse_train = np.sqrt(np.mean(np.power((y_train - train_predict), 2)))
-    # rmse_test = np.sqrt(np.mean(np.power((y_test - test_predict), 2)))
+    train_predict = model.predict(X_train)
+    print(train_predict.shape)
+
+    train_predict = scaler.inverse_transform(train_predict)
+    y_train = scaler.inverse_transform(y_train.reshape(-1, 1))
