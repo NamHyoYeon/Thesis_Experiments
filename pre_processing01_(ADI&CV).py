@@ -3,6 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
+from matplotlib.dates import date2num
+import datetime
+
 file_path = './data/Online Retail Dataset.csv'
 
 # 월별로 그룹핑 후 ADI, CV 구하기
@@ -65,21 +68,106 @@ if __name__ == "__main__":
     df_adi_cv_result[~df_adi_cv_result['Demand Pattern'].isna()]
     print(df_adi_cv_result.groupby('Demand Pattern')['Description'].count())
 
-    # 일정한 수량의 수요가 규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Smooth'].sort_values(by='CNT', ascending=False).head())
-    df_yyyymm[df_yyyymm['Description'] == 'QUEENS GUARD COFFEE MUG'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
+    # 수요패턴 별 plot 확인
+    # Erratic : 일정하지 않은 수량의 수요가 규칙적으로 발생
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Erratic'].sort_values(by='CNT', ascending=False).head(100))
+    product = df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Erratic'].sort_values(by='CNT', ascending=False).head(1)['Description'].values[0]
+    print(product)
 
-    # 일정하지 않은 수량의 수요가 규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Erratic'].sort_values(by='CNT', ascending=False).head())
-    df_yyyymm[df_yyyymm['Description'] == 'TOAST ITS - HAPPY BIRTHDAY'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
+    start_date = pd.Timestamp('2010-01-01')
+    end_date = pd.Timestamp('2011-12-01')
+    dates = pd.date_range(start_date, end_date, freq='MS')
+    date_range = [x.strftime('%Y-%m') for x in dates]
 
-    # 일정한 수량의 수요가 불규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Intermittent'].sort_values(by='CNT', ascending=False).head())
-    df_yyyymm[df_yyyymm['Description'] == 'WHITE STITCHED CUSHION COVER'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
+    data = {'YYYYMM':date_range}
+    plot_df = pd.DataFrame(data)
+    plot_df['Quantity'] = 0
 
-    # 일정하지 않은 수량의 수요가 불규칙적으로 발생
-    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Lumpy'].sort_values(by='CNT', ascending=False).head(20))
-    df_yyyymm[df_yyyymm['Description'] == 'BLACK/BLUE POLKADOT UMBRELLA'].plot(x='YYYYMM', y= 'Quantity', kind='bar')
+    plot_df_temp = df_yyyymm[df_yyyymm['Description'] == product]
+    print(plot_df_temp)
+
+    for i in range(len(plot_df)):
+        yyyymm = plot_df.loc[i,'YYYYMM']
+        if len(plot_df_temp[plot_df_temp['YYYYMM'] == yyyymm]):
+            print(yyyymm)
+            plot_df.loc[i,'Quantity'] = plot_df_temp.loc[(plot_df_temp['YYYYMM'] == yyyymm), 'Quantity'].values[0]
+
+    plot_df.plot(x='YYYYMM', y='Quantity', kind='bar',title=product)
+
+    # Intermittent : 일정한 수량의 수요가 불규칙적으로 발생
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Intermittent'].sort_values(by='CNT', ascending=False).head(100))
+    product = df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Intermittent'].sort_values(by='CNT', ascending=False).head(1)['Description'].values[0]
+    print(product)
+
+    start_date = pd.Timestamp('2010-01-01')
+    end_date = pd.Timestamp('2011-12-01')
+    dates = pd.date_range(start_date, end_date, freq='MS')
+    date_range = [x.strftime('%Y-%m') for x in dates]
+
+    data = {'YYYYMM':date_range}
+    plot_df = pd.DataFrame(data)
+    plot_df['Quantity'] = 0
+
+    plot_df_temp = df_yyyymm[df_yyyymm['Description'] == product]
+    print(plot_df_temp)
+
+    for i in range(len(plot_df)):
+        yyyymm = plot_df.loc[i,'YYYYMM']
+        if len(plot_df_temp[plot_df_temp['YYYYMM'] == yyyymm]):
+            print(yyyymm)
+            plot_df.loc[i,'Quantity'] = plot_df_temp.loc[(plot_df_temp['YYYYMM'] == yyyymm), 'Quantity'].values[0]
+
+    plot_df.plot(x='YYYYMM', y='Quantity', kind='bar',title=product)
+
+    # Lumpy : 일정하지 않은 수량의 수요가 불규칙적으로 발생
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Lumpy'].sort_values(by='CNT', ascending=True).head(200))
+    product = df_adi_cv_result.loc[3852,'Description']
+    print(product)
+
+    start_date = pd.Timestamp('2011-02-01')
+    end_date = pd.Timestamp('2011-12-01')
+    dates = pd.date_range(start_date, end_date, freq='MS')
+    date_range = [x.strftime('%Y-%m') for x in dates]
+
+    data = {'YYYYMM':date_range}
+    plot_df = pd.DataFrame(data)
+    plot_df['Quantity'] = 0
+
+    plot_df_temp = df_yyyymm[df_yyyymm['Description'] == product]
+    print(plot_df_temp)
+
+    for i in range(len(plot_df)):
+        yyyymm = plot_df.loc[i,'YYYYMM']
+        if len(plot_df_temp[plot_df_temp['YYYYMM'] == yyyymm]):
+            print(yyyymm)
+            plot_df.loc[i,'Quantity'] = plot_df_temp.loc[(plot_df_temp['YYYYMM'] == yyyymm), 'Quantity'].values[0]
+
+    plot_df.plot(x='YYYYMM', y='Quantity', kind='bar',title=product)
+
+    # Smooth: 일정한 수량의 수요가 규칙적으로 발생
+    print(df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Smooth'].sort_values(by='CNT', ascending=False).head(100))
+    product = df_adi_cv_result[df_adi_cv_result['Demand Pattern'] == 'Smooth'].sort_values(by='CNT', ascending=False).head(1)['Description'].values[0]
+    print(product)
+
+    start_date = pd.Timestamp('2010-12-01')
+    end_date = pd.Timestamp('2011-12-01')
+    dates = pd.date_range(start_date, end_date, freq='MS')
+    date_range = [x.strftime('%Y-%m') for x in dates]
+
+    data = {'YYYYMM':date_range}
+    plot_df = pd.DataFrame(data)
+    plot_df['Quantity'] = 0
+
+    plot_df_temp = df_yyyymm[df_yyyymm['Description'] == product]
+    print(plot_df_temp)
+
+    for i in range(len(plot_df)):
+        yyyymm = plot_df.loc[i,'YYYYMM']
+        if len(plot_df_temp[plot_df_temp['YYYYMM'] == yyyymm]):
+            print(yyyymm)
+            plot_df.loc[i,'Quantity'] = plot_df_temp.loc[(plot_df_temp['YYYYMM'] == yyyymm), 'Quantity'].values[0]
+
+    plot_df.plot(x='YYYYMM', y='Quantity', kind='bar',title=product)
 
     df_final = pd.merge(df_yyyymm, df_adi_cv_result, on='Description', how='left')
     df_final = df_final[['YYYYMM','Description','Quantity','Demand Pattern']]
