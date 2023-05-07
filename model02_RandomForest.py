@@ -88,6 +88,8 @@ if __name__ == "__main__":
     r2s_1_Lumpy = r2_score(df_val[df_val['Lumpy'] == 1]['Quantity'], df_val[df_val['Lumpy'] == 1]['predict_Quantity'])
     r2s_1_Smooth = r2_score(df_val[df_val['Smooth'] == 1]['Quantity'], df_val[df_val['Smooth'] == 1]['predict_Quantity'])
 
+    df_val.to_csv(r'./data/result/df_final_randomforest_1.csv')
+
     # 2. 전월 quantity 만 feature 로 사용
     for p in product_list:
         df_tgt = df[df['Description'] == p]
@@ -140,6 +142,8 @@ if __name__ == "__main__":
     r2s_2_Lumpy = r2_score(df_val[df_val['Lumpy'] == 1]['Quantity'], df_val[df_val['Lumpy'] == 1]['predict_Quantity'])
     r2s_2_Smooth = r2_score(df_val[df_val['Smooth'] == 1]['Quantity'], df_val[df_val['Smooth'] == 1]['predict_Quantity'])
 
+    df_val.to_csv(r'./data/result/df_final_randomforest_2.csv')
+
     # 예측 건수 확인
     final_product_cnt = len(df_val['Description'].unique())
     final_product_Erratic_cnt = len(df_val[df_val['Erratic'] == 1]['Description'].unique())
@@ -148,3 +152,5 @@ if __name__ == "__main__":
     final_product_Smooth_cnt = len(df_val[df_val['Smooth'] == 1]['Description'].unique())
 
     af = datetime.datetime.now()
+
+    df_val.to_csv(r'./data/result/df_final_randomforest.csv')

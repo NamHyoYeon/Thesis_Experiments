@@ -85,6 +85,8 @@ if __name__ == "__main__":
     r2s_1_Lumpy = r2_score(df_val[df_val['Lumpy'] == 1]['Quantity'], df_val[df_val['Lumpy'] == 1]['predict_Quantity'])
     r2s_1_Smooth = r2_score(df_val[df_val['Smooth'] == 1]['Quantity'], df_val[df_val['Smooth'] == 1]['predict_Quantity'])
 
+    df_val.to_csv(r'./data/result/df_final_xgboost_1.csv')
+
     # 2. 전월 quantity 만 feature 로 사용
     for p in product_list:
         df_tgt = df[df['Description'] == p]
@@ -136,6 +138,8 @@ if __name__ == "__main__":
     r2s_2_Intermittent = r2_score(df_val[df_val['Intermittent'] == 1]['Quantity'], df_val[df_val['Intermittent'] == 1]['predict_Quantity'])
     r2s_2_Lumpy = r2_score(df_val[df_val['Lumpy'] == 1]['Quantity'], df_val[df_val['Lumpy'] == 1]['predict_Quantity'])
     r2s_2_Smooth = r2_score(df_val[df_val['Smooth'] == 1]['Quantity'], df_val[df_val['Smooth'] == 1]['predict_Quantity'])
+
+    df_val.to_csv(r'./data/result/df_final_xgboost_2.csv')
 
     # 예측 건수 확인
     final_product_cnt = len(df_val['Description'].unique())

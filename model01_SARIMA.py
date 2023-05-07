@@ -97,6 +97,7 @@ if __name__ == "__main__":
     r2s_1_Lumpy = r2_score(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
     r2s_1_Smooth = r2_score(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
 
+    df_final.to_csv(r'./data/result/df_final_sarima_1.csv')
 
     # 2. quantity 만 feature 로 사용
     for product in product_list:
@@ -151,6 +152,7 @@ if __name__ == "__main__":
     r2s_2_Lumpy = r2_score(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
     r2s_2_Smooth = r2_score(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
 
+    df_final.to_csv(r'./data/result/df_final_sarima_2.csv')
 
     # 예측 건수 확인
     final_product_cnt = len(df_final['Description'].unique())
