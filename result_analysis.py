@@ -1,4 +1,6 @@
 import pandas as pd
+
+pd.set_option('display.max_columns', None)
 import numpy as np
 import datetime
 
@@ -16,13 +18,15 @@ file_path3 = './data/result/df_final_randomforest_1.csv'
 file_path4 = './data/result/df_final_randomforest_2.csv'
 file_path5 = './data/result/df_final_xgboost_1.csv'
 file_path6 = './data/result/df_final_xgboost_2.csv'
+file_path7 = './data/result/df_lstm_1_temp.csv'
+file_path8 = './data/result/df_lstm_2_temp.csv'
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 if __name__ == "__main__":
-    pd.set_option('display.max_columns', None)
-    df = pd.read_csv(file_path1)
+    df = pd.read_csv(file_path8)
+    df = df[~df['predict_Quantity'].isna()]
 
     # MAE 구하기
     mae_total = mean_absolute_error(df['Quantity'], df['predict_Quantity'])
