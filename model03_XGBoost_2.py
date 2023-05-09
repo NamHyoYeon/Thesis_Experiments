@@ -5,7 +5,7 @@ import datetime
 
 # model packages
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 file_path = './data/df_final_with_bf1mm.csv'
 
 if __name__ == "__main__":
@@ -59,9 +59,9 @@ if __name__ == "__main__":
             y_train = df_input.loc[:index_list[-2], target_variable]
             y_test = df_input.loc[index_list[-1]:, target_variable]
 
-            rf = RandomForestRegressor(n_estimators=50, random_state=42, max_depth=5)
-            rf.fit(x_train, y_train)
-            y_pred = rf.predict(x_test)
+            xgb = XGBRegressor(objective='reg:squarederror', n_estimators=50, learning_rate=0.01, random_state=42, max_depth=5)
+            xgb.fit(x_train, y_train)
+            y_pred = xgb.predict(x_test)
 
             print(y_pred)
             print(y_test)
@@ -72,7 +72,7 @@ if __name__ == "__main__":
     df_val = df[~df['predict_Quantity'].isna()]
     print(df_val)
 
-    df_val.to_csv(r'./data/result/df_final_randomforest_1_2.csv')
+    df_val.to_csv(r'./data/result/df_final_xgboost_1_2.csv')
 
     for p in product_list:
         print(p)
@@ -116,9 +116,9 @@ if __name__ == "__main__":
             y_train = df_input.loc[:index_list[-2], target_variable]
             y_test = df_input.loc[index_list[-1]:, target_variable]
 
-            rf = RandomForestRegressor(n_estimators=50, random_state=42, max_depth=5)
-            rf.fit(x_train, y_train)
-            y_pred = rf.predict(x_test)
+            xgb = XGBRegressor(objective='reg:squarederror', n_estimators=50, learning_rate=0.01, random_state=42, max_depth=5)
+            xgb.fit(x_train, y_train)
+            y_pred = xgb.predict(x_test)
             print(y_pred)
             print(y_test)
 
@@ -128,6 +128,6 @@ if __name__ == "__main__":
     df_val = df[~df['predict_Quantity'].isna()]
     print(df_val)
 
-    df_val.to_csv(r'./data/result/df_final_randomforest_2_2.csv')
+    df_val.to_csv(r'./data/result/df_final_xgboost_2_2.csv')
 
 

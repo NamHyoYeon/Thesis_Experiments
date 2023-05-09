@@ -17,8 +17,8 @@ file_path1 = './data/result/df_final_sarima_1.csv'
 file_path2 = './data/result/df_final_sarima_2.csv'
 file_path3 = './data/result/df_final_randomforest_1.csv'
 file_path4 = './data/result/df_final_randomforest_2.csv'
-file_path5 = './data/result/df_final_xgboost_1.csv'
-file_path6 = './data/result/df_final_xgboost_2.csv'
+file_path5 = './data/result/df_final_xgboost_1_2.csv'
+file_path6 = './data/result/df_final_xgboost_2_2.csv'
 file_path7 = './data/result/df_lstm_1_temp.csv'
 file_path8 = './data/result/df_lstm_2_temp.csv'
 
@@ -26,11 +26,13 @@ def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true))*100
 
 if __name__ == "__main__":
-    df_temp = pd.read_csv(file_path1)
+    df_temp = pd.read_csv(file_path5)
     product_temp_list = df_temp['Description'].unique()
     df_temp = df_temp[~df_temp['predict_Quantity'].isna()]
 
-    df = pd.read_csv(file_path5)
+    check_file = file_path6
+    df = pd.read_csv(check_file)
+
     df = df[~df['predict_Quantity'].isna()]
 
     # 예측 해야 하는 값이 0인 것을 제외 하고, 성능 비교

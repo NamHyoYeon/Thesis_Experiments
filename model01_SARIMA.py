@@ -2,17 +2,9 @@ import pandas as pd
 import numpy as np
 import datetime
 
-# plot packages
-import matplotlib.pyplot as plt
-
 # model packages
+from sklearn.preprocessing import MinMaxScaler
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
-# metrics for model
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import mean_absolute_error
 
 file_path = './data/df_final_with_bf1mm.csv'
 

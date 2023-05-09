@@ -1,95 +1,133 @@
 import pandas as pd
+pd.set_option('display.max_columns', None)
 import numpy as np
 import datetime
 
-# plot packages
-import matplotlib.pyplot as plt
-
 # model packages
+from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
-
-# metrics for model
-from sklearn.metrics import r2_score
-from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import mean_squared_error
-
 file_path = './data/df_final_with_bf1mm.csv'
 
-def mean_absolute_percentage_error(y_true, y_pred):
-    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
-
 if __name__ == "__main__":
-    pd.set_option('display.max_columns', None)
     df = pd.read_csv(file_path)
-
-    # 전월 값이 있는 ROW 부터 모델에 사용
-    df = df[~df['Quantity_bf1mm'].isna()]
-    # float -> int
-    df[['Quantity_bf1mm','0_cluster_bf1mm','1_cluster_bf1mm','2_cluster_bf1mm','3_cluster_bf1mm','4_cluster_bf1mm']] = df[['Quantity_bf1mm','0_cluster_bf1mm','1_cluster_bf1mm','2_cluster_bf1mm','3_cluster_bf1mm','4_cluster_bf1mm']].astype(int)
     df = df.set_index(['YYYYMM'])
     df['predict_Quantity'] = np.nan
-    print(df.head())
     df.sort_values(['Description','YYYYMM'], inplace=True)
-
     product_list = df['Description'].unique()
+
     bf = datetime.datetime.now()
 
-    # 1. 전월 quantity + 전월 clustering 값 모두 feature 로 사용
     for p in product_list:
+        print(p)
         df_tgt = df[df['Description'] == p]
-        max_index = df_tgt.index.max()
-        second_index = df_tgt[df_tgt.index != max_index].index.max()
+        if len(df_tgt) >= 10:
+            df_tgt = df_tgt[['Description','Quantity','0_cluster','1_cluster','2_cluster','3_cluster','4_cluster']]
+            index_list = df_tgt.index.to_list()
+            max_index = index_list[-1]
 
-        if len(df_tgt) > 5:
+            df_input = pd.DataFrame()
+            look_back = 3
+
+            for i in range(len(index_list)):
+                bf_index = 1
+                df_temp = df_tgt[(df_tgt.index == index_list[i]) & (df_tgt['Description'] == p)]
+                if i >= look_back:
+                 for j in range(i-look_back,i):
+                    temp = df_tgt[(df_tgt.index == index_list[j]) & (df_tgt['Description'] == p)]
+                    temp = temp.reset_index()
+                    temp.index = [index_list[i]]
+                    temp = temp[['Quantity','0_cluster','1_cluster','2_cluster','3_cluster','4_cluster']]
+                    temp = temp.rename(columns=lambda x: f'bf_{bf_index}_{x}')
+
+                    df_temp = pd.concat([df_temp, temp], axis=1)
+                    if j == i-1:
+                        df_input = pd.concat([df_input, df_temp], axis=0)
+                    bf_index = bf_index + 1
+
             target_variable = 'Quantity'
-            features = ['Quantity_bf1mm', '0_cluster_bf1mm', '1_cluster_bf1mm', '2_cluster_bf1mm', '3_cluster_bf1mm', '4_cluster_bf1mm']
+            # 당월 값은 및 상품명은 제외
+            not_features = ['Description','0_cluster','1_cluster','2_cluster','3_cluster','4_cluster']
+            tgt_scale = [x for x in df_input.columns if x not in not_features]
+            features = [x for x in df_input.columns if (x != target_variable) & (x not in not_features)]
 
-            X_train = df_tgt[df_tgt['Description'] == p].loc[:second_index,features]
-            X_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, features]
-            y_train = df_tgt[df_tgt['Description'] == p].loc[:second_index,target_variable]
-            y_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, target_variable]
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            scaled_data_x = scaler.fit_transform(df_input[features])
 
-            xgb = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
-            xgb.fit(X_train, y_train)
+            x_train = scaled_data_x[:-1,1:]
+            x_test = scaled_data_x[-1:,1:]
 
-            y_pred = xgb.predict(X_test)
+            y_train = df_input.loc[:index_list[-2], target_variable]
+            y_test = df_input.loc[index_list[-1]:, target_variable]
+
+            xgb = XGBRegressor(objective='reg:squarederror', n_estimators=50, learning_rate=0.01, random_state=42, max_depth=5)
+            xgb.fit(x_train, y_train)
+            y_pred = xgb.predict(x_test)
+
             print(y_pred)
+            print(y_test)
 
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = y_pred[0]
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'importance_Quantity_bf1mm'] = np.round(xgb.feature_importances_.reshape(1,6)[0][0],2)
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'importance_0_cluster_bf1mm'] = np.round(xgb.feature_importances_.reshape(1,6)[0][1],2)
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'importance_1_cluster_bf1mm'] = np.round(xgb.feature_importances_.reshape(1,6)[0][2],2)
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'importance_2_cluster_bf1mm'] = np.round(xgb.feature_importances_.reshape(1,6)[0][3],2)
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'importance_3_cluster_bf1mm'] = np.round(xgb.feature_importances_.reshape(1,6)[0][4],2)
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'importance_4_cluster_bf1mm'] = np.round(xgb.feature_importances_.reshape(1,6)[0][5],2)
-
-    df_val = df[~df['predict_Quantity'].isna()]
-    df_val.to_csv(r'./data/result/df_final_xgboost_1.csv')
-
-    # # 2. 전월 quantity 만 feature 로 사용
-    for p in product_list:
-        df_tgt = df[df['Description'] == p]
-        max_index = df_tgt.index.max()
-        second_index = df_tgt[df_tgt.index != max_index].index.max()
-
-        if len(df_tgt) > 5:
-            target_variable = 'Quantity'
-            features = ['Quantity_bf1mm']
-
-            X_train = df_tgt[df_tgt['Description'] == p].loc[:second_index,features]
-            X_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, features]
-            y_train = df_tgt[df_tgt['Description'] == p].loc[:second_index,target_variable]
-            y_test = df_tgt[df_tgt['Description'] == p].loc[max_index:, target_variable]
-
-            xgb = XGBRegressor(n_estimators=100, learning_rate=0.1, random_state=42)
-            xgb.fit(X_train, y_train)
-
-            y_pred = xgb.predict(X_test)
-            print(y_pred)
-
-            df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = y_pred[0]
-
-    df_val = df[~df['predict_Quantity'].isna()]
-    df_val.to_csv(r'./data/result/df_final_xgboost_2.csv')
+            df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = int(np.ceil(y_pred[0]))
 
     af = datetime.datetime.now()
+    df_val = df[~df['predict_Quantity'].isna()]
+    print(df_val)
+
+    df_val.to_csv(r'./data/result/df_final_xgboost_1.csv')
+
+    for p in product_list:
+        print(p)
+        df_tgt = df[df['Description'] == p]
+        if len(df_tgt) >= 10:
+            df_tgt = df_tgt[
+                ['Description', 'Quantity']]
+            index_list = df_tgt.index.to_list()
+            max_index = index_list[-1]
+
+            df_input = pd.DataFrame()
+            look_back = 3
+
+            for i in range(len(index_list)):
+                bf_index = 1
+                df_temp = df_tgt[(df_tgt.index == index_list[i]) & (df_tgt['Description'] == p)]
+                if i >= look_back:
+                    for j in range(i - look_back, i):
+                        temp = df_tgt[(df_tgt.index == index_list[j]) & (df_tgt['Description'] == p)]
+                        temp = temp.reset_index()
+                        temp.index = [index_list[i]]
+                        temp = temp[['Quantity']]
+                        temp = temp.rename(columns=lambda x: f'bf_{bf_index}_{x}')
+
+                        df_temp = pd.concat([df_temp, temp], axis=1)
+                        if j == i - 1:
+                            df_input = pd.concat([df_input, df_temp], axis=0)
+                        bf_index = bf_index + 1
+
+            target_variable = 'Quantity'
+            # 당월 값은 및 상품명은 제외
+            not_features = ['Description']
+            features = [x for x in df_input.columns if (x != target_variable) & (x not in not_features)]
+
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            scaled_data_x = scaler.fit_transform(df_input[features])
+
+            x_train = scaled_data_x[:-1,1:]
+            x_test = scaled_data_x[-1:,1:]
+
+            y_train = df_input.loc[:index_list[-2], target_variable]
+            y_test = df_input.loc[index_list[-1]:, target_variable]
+
+            xgb = XGBRegressor(objective='reg:squarederror', n_estimators=50, learning_rate=0.01, random_state=42, max_depth=5)
+            xgb.fit(x_train, y_train)
+            y_pred = xgb.predict(x_test)
+            print(y_pred)
+            print(y_test)
+
+            df.loc[(df['Description'] == p) & (df.index == max_index), 'predict_Quantity'] = int(np.ceil(y_pred[0]))
+
+    af = datetime.datetime.now()
+    df_val = df[~df['predict_Quantity'].isna()]
+    print(df_val)
+
+    df_val.to_csv(r'./data/result/df_final_xgboost_2.csv')
+
+
