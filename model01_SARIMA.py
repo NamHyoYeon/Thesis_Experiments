@@ -47,6 +47,7 @@ if __name__ == "__main__":
     for product in product_list:
         if len(df_tgt[df_tgt['Description'] == product]) > 5:
             max_index = df_tgt[df_tgt['Description'] == product].index.max()
+            second_index = df_tgt[(df_tgt['Description'] == product) & (df_tgt.index != max_index)].index.max()
             train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
             test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
             print(max_index)
@@ -65,37 +66,10 @@ if __name__ == "__main__":
             df.columns = ['predict_Quantity','max_index','product']
             predict_value = round(df.iloc[0,0],2)
             df_tgt.loc[(df_tgt['Description'] == product) & (df_tgt.index == max_index), 'predict_Quantity'] = predict_value
+        break
 
     df_final = df_tgt[~df_tgt['predict_Quantity'].isna()]
     df_final['predict_Quantity'] = df_final['predict_Quantity'].astype('int64')
-
-    # MAE 구하기
-    mae1_total = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
-    mae1_Erratic = mean_absolute_error(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity'])
-    mae1_Intermittent = mean_absolute_error(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity'])
-    mae1_Lumpy = mean_absolute_error(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
-    mae1_Smooth = mean_absolute_error(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
-
-    # RMSE 구하기
-    rmse1_total = np.sqrt(mean_squared_error(df_final['Quantity'], df_final['predict_Quantity']))
-    rmse1_Erratic = np.sqrt(mean_squared_error(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity']))
-    rmse1_Intermittent = np.sqrt(mean_squared_error(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity']))
-    rmse1_Lumpy = np.sqrt(mean_squared_error(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity']))
-    rmse1_Smooth = np.sqrt(mean_squared_error(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity']))
-
-    # MAPE 구하기
-    mape1_total = mean_absolute_percentage_error(df_final['Quantity'], df_final['predict_Quantity'])
-    mape1_Erratic = mean_absolute_percentage_error(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity'])
-    mape1_Intermittent = mean_absolute_percentage_error(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity'])
-    mape1_Lumpy = mean_absolute_percentage_error(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
-    mape1_Smooth = mean_absolute_percentage_error(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
-
-    # R2 스코어 구하기
-    r2s_1_total = r2_score(df_final['Quantity'], df_final['predict_Quantity'])
-    r2s_1_Erratic = r2_score(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity'])
-    r2s_1_Intermittent = r2_score(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity'])
-    r2s_1_Lumpy = r2_score(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
-    r2s_1_Smooth = r2_score(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
 
     df_final.to_csv(r'./data/result/df_final_sarima_1.csv')
 
@@ -124,41 +98,6 @@ if __name__ == "__main__":
     df_final = df_tgt[~df_tgt['predict_Quantity'].isna()]
     df_final['predict_Quantity'] = df_final['predict_Quantity'].astype('int64')
 
-    # MAE 구하기
-    mae2_total = mean_absolute_error(df_final['Quantity'], df_final['predict_Quantity'])
-    mae2_Erratic = mean_absolute_error(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity'])
-    mae2_Intermittent = mean_absolute_error(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity'])
-    mae2_Lumpy = mean_absolute_error(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
-    mae2_Smooth = mean_absolute_error(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
-
-    # RMSE 구하기
-    rmse2_total = np.sqrt(mean_squared_error(df_final['Quantity'], df_final['predict_Quantity']))
-    rmse2_Erratic = np.sqrt(mean_squared_error(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity']))
-    rmse2_Intermittent = np.sqrt(mean_squared_error(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity']))
-    rmse2_Lumpy = np.sqrt(mean_squared_error(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity']))
-    rmse2_Smooth = np.sqrt(mean_squared_error(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity']))
-
-    # MAPE 구하기
-    mape2_total = mean_absolute_percentage_error(df_final['Quantity'], df_final['predict_Quantity'])
-    mape2_Erratic = mean_absolute_percentage_error(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity'])
-    mape2_Intermittent = mean_absolute_percentage_error(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity'])
-    mape2_Lumpy = mean_absolute_percentage_error(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
-    mape2_Smooth = mean_absolute_percentage_error(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
-
-    # R2 스코어 구하기
-    r2s_2_total = r2_score(df_final['Quantity'], df_final['predict_Quantity'])
-    r2s_2_Erratic = r2_score(df_final[df_final['Erratic'] == 1]['Quantity'], df_final[df_final['Erratic'] == 1]['predict_Quantity'])
-    r2s_2_Intermittent = r2_score(df_final[df_final['Intermittent'] == 1]['Quantity'], df_final[df_final['Intermittent'] == 1]['predict_Quantity'])
-    r2s_2_Lumpy = r2_score(df_final[df_final['Lumpy'] == 1]['Quantity'], df_final[df_final['Lumpy'] == 1]['predict_Quantity'])
-    r2s_2_Smooth = r2_score(df_final[df_final['Smooth'] == 1]['Quantity'], df_final[df_final['Smooth'] == 1]['predict_Quantity'])
-
     df_final.to_csv(r'./data/result/df_final_sarima_2.csv')
-
-    # 예측 건수 확인
-    final_product_cnt = len(df_final['Description'].unique())
-    final_product_Erratic_cnt = len(df_final[df_final['Erratic'] == 1]['Description'].unique())
-    final_product_Intermittent_cnt = len(df_final[df_final['Intermittent'] == 1]['Description'].unique())
-    final_product_Lumpy_cnt = len(df_final[df_final['Lumpy'] == 1]['Description'].unique())
-    final_product_Smooth_cnt = len(df_final[df_final['Smooth'] == 1]['Description'].unique())
 
     af = datetime.datetime.now()
