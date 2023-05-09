@@ -15,7 +15,7 @@ from sklearn.metrics import mean_squared_log_error
 
 file_path1 = './data/result/df_final_sarima_1.csv'
 file_path2 = './data/result/df_final_sarima_2.csv'
-file_path3 = './data/result/df_final_randomforest_1.csv'
+file_path3 = './data/result/df_final_randomforest_1_2.csv'
 file_path4 = './data/result/df_final_randomforest_2.csv'
 file_path5 = './data/result/df_final_xgboost_1_2.csv'
 file_path6 = './data/result/df_final_xgboost_2_2.csv'
@@ -30,7 +30,7 @@ if __name__ == "__main__":
     product_temp_list = df_temp['Description'].unique()
     df_temp = df_temp[~df_temp['predict_Quantity'].isna()]
 
-    check_file = file_path6
+    check_file = file_path3
     df = pd.read_csv(check_file)
 
     df = df[~df['predict_Quantity'].isna()]
