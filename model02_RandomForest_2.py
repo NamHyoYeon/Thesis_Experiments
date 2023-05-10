@@ -59,7 +59,7 @@ if __name__ == "__main__":
             y_train = df_input.loc[:index_list[-2], target_variable]
             y_test = df_input.loc[index_list[-1]:, target_variable]
 
-            rf = RandomForestRegressor(n_estimators=50, random_state=42, max_depth=5)
+            rf = RandomForestRegressor(n_estimators=100, max_depth=10, min_samples_split=5)
             rf.fit(x_train, y_train)
             y_pred = rf.predict(x_test)
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
             y_train = df_input.loc[:index_list[-2], target_variable]
             y_test = df_input.loc[index_list[-1]:, target_variable]
 
-            rf = RandomForestRegressor(n_estimators=50, random_state=42, max_depth=5)
+            rf = RandomForestRegressor(n_estimators=100, max_depth=10, min_samples_split=5)
             rf.fit(x_train, y_train)
             y_pred = rf.predict(x_test)
             print(y_pred)

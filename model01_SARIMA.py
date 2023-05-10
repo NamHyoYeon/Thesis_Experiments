@@ -1,4 +1,5 @@
 import pandas as pd
+pd.set_option('display.max_columns', None)
 import numpy as np
 import datetime
 
@@ -12,45 +13,40 @@ def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
 
 if __name__ == "__main__":
-    pd.set_option('display.max_columns', None)
     df = pd.read_csv(file_path)
-
-    # 전월 값이 있는 ROW 부터 모델에 사용
-    df = df[~df['Quantity_bf1mm'].isna()]
     df = df.set_index(['YYYYMM'])
     df['predict_Quantity'] = np.nan
-    print(df.head())
     df.sort_values(['Description','YYYYMM'], inplace=True)
-
-    # 변수 정하기
-    df_tgt = df[['Description','Quantity','0_cluster','1_cluster','2_cluster','3_cluster','4_cluster','Erratic','Intermittent','Lumpy','Smooth']]
-    print(df_tgt.head())
-
-    # Description(상품) 별로 예측, 가장 마지막 달을 기준으로 train
-    product_list = df_tgt['Description'].unique()
-    df_tgt['predict_Quantity'] = np.nan
+    product_list = df['Description'].unique()
 
     bf = datetime.datetime.now()
 
-    grouping = df_tgt.groupby('Description').count()
-    print(len(grouping[grouping['Quantity'] >=5]))
-
     # 1. quantity + clustering 값 모두 feature 로 사용
     for product in product_list:
-        if len(df_tgt[df_tgt['Description'] == product]) > 5:
-            max_index = df_tgt[df_tgt['Description'] == product].index.max()
-            second_index = df_tgt[(df_tgt['Description'] == product) & (df_tgt.index != max_index)].index.max()
-            train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
-            test = df_tgt[df_tgt['Description'] == product].loc[max_index:]
-            print(max_index)
+        df_tgt = df[df['Description'] == product]
+        print(df_tgt)
+
+        if len(df_tgt) >= 10:
+            max_index = df_tgt.index.max()
+            second_index = df_tgt[df_tgt.index != max_index].index.max()
+
+            target_variable = 'Quantity'
+            features = ['0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster']
+            scaler = MinMaxScaler(feature_range=(0, 1))
+            scaled_data_x = scaler.fit_transform(df_tgt[features])
+
+            x_train = scaled_data_x[:-1,1:]
+            x_test = scaled_data_x[-1:,1:]
+
+            y_train = df_tgt.loc[:second_index,target_variable]
+            y_test = df_tgt.loc[max_index:,target_variable]
 
             # Fit an SARIMAX model to the training data
-            model = SARIMAX(train['Quantity'], exog=train[['0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster']], order=(1, 0, 0))
+            model = SARIMAX(y_train, exog=x_train, order=(1, 0, 0))
             result = model.fit()
 
             # Make predictions for the test set
-            forecast = result.forecast(steps=len(test), exog=test[
-                ['0_cluster', '1_cluster', '2_cluster', '3_cluster', '4_cluster']])
+            forecast = result.forecast(steps=len(y_test), exorg=x_test)
 
             df = forecast.to_frame()
             df['max_index'] = max_index
@@ -67,7 +63,7 @@ if __name__ == "__main__":
 
     # 2. quantity 만 feature 로 사용
     for product in product_list:
-        if len(df_tgt[df_tgt['Description'] == product]) > 5:
+        if len(df_tgt[df_tgt['Description'] == product]) >= 10:
             max_index = df_tgt[df_tgt['Description'] == product].index.max()
             train = df_tgt[df_tgt['Description'] == product].loc[:max_index]
             test = df_tgt[df_tgt['Description'] == product].loc[max_index:]

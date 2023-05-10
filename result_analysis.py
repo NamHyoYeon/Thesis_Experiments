@@ -16,21 +16,23 @@ from sklearn.metrics import mean_squared_log_error
 file_path1 = './data/result/df_final_sarima_1.csv'
 file_path2 = './data/result/df_final_sarima_2.csv'
 file_path3 = './data/result/df_final_randomforest_1_2.csv'
-file_path4 = './data/result/df_final_randomforest_2.csv'
+file_path4 = './data/result/df_final_randomforest_2_2.csv'
 file_path5 = './data/result/df_final_xgboost_1_2.csv'
 file_path6 = './data/result/df_final_xgboost_2_2.csv'
-file_path7 = './data/result/df_lstm_1_temp.csv'
-file_path8 = './data/result/df_lstm_2_temp.csv'
+file_path7 = './data/result/df_final_xgboost_1_3.csv'
+file_path8 = './data/result/df_final_xgboost_2_3.csv'
+file_path9 = './data/result/df_final_xgboost_1_4.csv'
+file_path10 = './data/result/df_final_xgboost_2_4.csv'
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / y_true))*100
 
 if __name__ == "__main__":
-    df_temp = pd.read_csv(file_path5)
+    df_temp = pd.read_csv(file_path10)
     product_temp_list = df_temp['Description'].unique()
     df_temp = df_temp[~df_temp['predict_Quantity'].isna()]
 
-    check_file = file_path3
+    check_file = file_path10
     df = pd.read_csv(check_file)
 
     df = df[~df['predict_Quantity'].isna()]
