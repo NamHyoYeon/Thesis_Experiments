@@ -6,7 +6,6 @@ import datetime
 # model packages
 from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
-from sklearn.model_selection import GridSearchCV
 
 file_path = './data/df_tgt.csv'
 
@@ -18,7 +17,7 @@ if __name__ == "__main__":
     product_list = df['Description'].unique()
 
     bf = datetime.datetime.now()
-    look_back = 5
+    look_back = 2
 
     for p in product_list:
         print(p)
@@ -74,10 +73,10 @@ if __name__ == "__main__":
     df_val = df_val[df_val['Quantity'] >= 1]
     df_val = df_val[df_val['predict_Quantity'] >= 0]
 
-    #df_val.to_csv('./data/result/xgboost_lookback_2.csv')
+    df_val.to_csv('./data/result/xgboost_lookback_2.csv')
     #df_val.to_csv('./data/result/xgboost_lookback_3.csv')
     #df_val.to_csv('./data/result/xgboost_lookback_4.csv')
-    df_val.to_csv('./data/result/xgboost_lookback_5.csv')
+    #df_val.to_csv('./data/result/xgboost_lookback_5.csv')
 
 
 
