@@ -6,9 +6,8 @@ import datetime
 # model packages
 from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
-from sklearn.model_selection import GridSearchCV
 
-file_path = './data/df_tgt.csv'
+file_path = './data/df_tgt_2.csv'
 
 if __name__ == "__main__":
     df = pd.read_csv(file_path)
@@ -17,16 +16,19 @@ if __name__ == "__main__":
     df.sort_values(['Description','YYYYMM'], inplace=True)
     product_list = df['Description'].unique()
 
+    print(df)
+
     bf = datetime.datetime.now()
-    look_back = 2
-    lr = 0.05
+    look_back = 5
 
     for p in product_list:
         print(p)
         df_tgt = df[df['Description'] == p]
+        demand_pattern = df_tgt['Demand Pattern'].unique()[0]
         df_tgt = df_tgt[
             ['Description', 'Quantity']]
-        index_list = df_tgt.index.to_list()
+        # 마지막에서 2번째 까지
+        index_list = df_tgt.index.to_list()[:-1]
         max_index = index_list[-1]
 
         df_input = pd.DataFrame()
@@ -60,7 +62,14 @@ if __name__ == "__main__":
         y_train = df_input.loc[:index_list[-2], target_variable]
         y_test = df_input.loc[index_list[-1]:, target_variable]
 
-        xgb = XGBRegressor(objective='reg:squarederror', n_estimators=5, learning_rate=lr, random_state=42, max_depth=3)
+        if demand_pattern == 'Smooth':
+            lr = 0.05
+        elif  demand_pattern == 'Intermittent':
+            lr = 0.05
+        else :
+            lr = 0.02
+
+        xgb = XGBRegressor(objective='reg:squarederror', n_estimators=5, learning_rate=0.01, random_state=42, max_depth=3)
         xgb.fit(x_train, y_train)
         y_pred = xgb.predict(x_test)
         print(y_pred)
@@ -75,10 +84,12 @@ if __name__ == "__main__":
     df_val = df_val[df_val['Quantity'] >= 1]
     df_val = df_val[df_val['predict_Quantity'] >= 0]
 
-    #df_val.to_csv('./data/result/xgboost_lr_0.01.csv')
-    #df_val.to_csv('./data/result/xgboost_lr_0.02.csv')
-    #df_val.to_csv('./data/result/xgboost_lr_0.04.csv')
-    df_val.to_csv('./data/result/xgboost_lr_0.05.csv')
+    print(df_val.groupby(['Demand Pattern','product_cluster']).count())
+
+    #df_val.to_csv('./data/result/xgboost2_lookback_2.csv')
+    #df_val.to_csv('./data/result/xgboost2_lookback_3.csv')
+    #df_val.to_csv('./data/result/xgboost2_lookback_4.csv')
+    df_val.to_csv('./data/result/xgboost2_lookback_5.csv')
 
 
 

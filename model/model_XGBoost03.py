@@ -7,7 +7,7 @@ import datetime
 from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
 
-file_path = './data/df_tgt.csv'
+file_path = './data/df_tgt_3.csv'
 
 if __name__ == "__main__":
     df = pd.read_csv(file_path)
@@ -28,7 +28,8 @@ if __name__ == "__main__":
         print(demand_pattern)
         df_tgt = df_tgt[
             ['Description', 'Quantity']]
-        index_list = df_tgt.index.to_list()
+        # 마지막에서 3번째 까지
+        index_list = df_tgt.index.to_list()[:-2]
         max_index = index_list[-1]
 
         df_input = pd.DataFrame()
@@ -68,8 +69,8 @@ if __name__ == "__main__":
             lr = 0.05
         else :
             lr = 0.02
-        xgb = XGBRegressor(objective='reg:squarederror', n_estimators=5, learning_rate=lr, random_state=42, max_depth=3)
 
+        xgb = XGBRegressor(objective='reg:squarederror', n_estimators=5, learning_rate=lr, random_state=42, max_depth=3)
         xgb.fit(x_train, y_train)
         y_pred = xgb.predict(x_test)
         print(y_pred)
@@ -84,12 +85,10 @@ if __name__ == "__main__":
     df_val = df_val[df_val['Quantity'] >= 1]
     df_val = df_val[df_val['predict_Quantity'] >= 0]
 
-    print(df_val.groupby(['Demand Pattern','product_cluster']).count())
-
-    #df_val.to_csv('./data/result/xgboost_lookback_2.csv')
-    #df_val.to_csv('./data/result/xgboost_lookback_3.csv')
-    #df_val.to_csv('./data/result/xgboost_lookback_4.csv')
-    df_val.to_csv('./data/result/xgboost_lookback_5.csv')
+    #df_val.to_csv('./data/result/xgboost3_lookback_2.csv')
+    #df_val.to_csv('./data/result/xgboost3_lookback_3.csv')
+    #df_val.to_csv('./data/result/xgboost3_lookback_4.csv')
+    df_val.to_csv('./data/result/xgboost3_lookback_5.csv')
 
 
 

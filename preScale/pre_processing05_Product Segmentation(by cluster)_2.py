@@ -4,7 +4,7 @@ import numpy as np
 import datetime
 
 from sklearn.cluster import KMeans
-file_path = './data/df_tgt.csv'
+file_path = './data/df_tgt_temp.csv'
 
 def look_back_df(look_back_product, look_df, look_back):
     tgt_df = pd.DataFrame()
@@ -15,7 +15,8 @@ def look_back_df(look_back_product, look_df, look_back):
         print(look_df_tgt.head())
         look_df_tgt = look_df_tgt[
             ['Description', 'Quantity']]
-        index_list = look_df_tgt.index.to_list()
+        # 마지막에서 두번째 까지
+        index_list = look_df_tgt.index.to_list()[:-1]
         max_index = index_list[-1]
 
         print(index_list)
@@ -59,23 +60,28 @@ if __name__ == "__main__":
                 kmeans.fit(cluster_df[['bf_1_Quantity','bf_2_Quantity']])
                 cluster_df['product_cluster'] = kmeans.labels_
                 cluster_df = cluster_df[['Description', 'product_cluster']]
-                df_tgt = pd.merge(df_tgt, group_cluster, how='left', on='Description')
-
-            elif p == 'Intermittent':
-                print("inin")
-                df_tgt = df[df['Demand Pattern'] == p]
-                group_cluster = df_tgt.groupby('Description')['Quantity'].sum().reset_index()
-                group_cluster['product_cluster'] = 0
-                group_cluster = group_cluster[['Description', 'product_cluster']]
-                df_tgt = pd.merge(df_tgt, group_cluster, how='left', on='Description')
+                df_tgt = pd.merge(df_tgt, cluster_df, how='left', on='Description')
 
             df_final = pd.concat([df_final,df_tgt], axis=0)
-    df_final[df_final['Demand Pattern'] == 'Intermittent']['product_cluster'] = 0
-    print(df_final.head())
 
+    print(len(df_final[df_final['Demand Pattern'] == 'Intermittent']))
 
-    df_final.to_csv(r'./data/df_tgt.csv')
+    df_final_temp = df[df['Demand Pattern'] == 'Intermittent']
+    df_final_temp['product_cluster']  = 0
+    df_final_temp = df_final_temp[['YYYYMM','Description','Quantity','Demand Pattern','product_cluster']]
 
+    df_final= df_final[['YYYYMM','Description','Quantity','Demand Pattern','product_cluster']]
+
+    df_final = pd.concat([df_final,df_final_temp], axis=0)
+    df_final_temp = df_final.groupby(['Description','product_cluster']).count().reset_index()
+    df_final_temp = df_final_temp[['Description','product_cluster']]
+
+    df = pd.merge(df, df_final_temp, on='Description',how='left')
+
+    df_final = df
+    print(df_final)
+
+    df_final.to_csv(r'./data/df_tgt_2.csv')
 
 
 

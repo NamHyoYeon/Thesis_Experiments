@@ -11,6 +11,14 @@ file_path1 = './data/result/xgboost_lookback_2.csv'
 file_path2 = './data/result/xgboost_lookback_3.csv'
 file_path3 = './data/result/xgboost_lookback_4.csv'
 file_path4 = './data/result/xgboost_lookback_5.csv'
+file_path5 = './data/result/xgboost2_lookback_2.csv'
+file_path6 = './data/result/xgboost2_lookback_3.csv'
+file_path7 = './data/result/xgboost2_lookback_4.csv'
+file_path8 = './data/result/xgboost2_lookback_5.csv'
+file_path9 = './data/result/xgboost3_lookback_2.csv'
+file_path10 = './data/result/xgboost3_lookback_3.csv'
+file_path11 = './data/result/xgboost3_lookback_4.csv'
+file_path12 = './data/result/xgboost3_lookback_5.csv'
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / np.abs(y_true))*100)
@@ -20,7 +28,7 @@ if __name__ == "__main__":
     df = df[~df['predict_Quantity'].isna()]
     df['predict_Quantity'] = df['predict_Quantity'].astype(int)
 
-    file_list = [file_path1, file_path2, file_path3, file_path4]
+    file_list = [file_path1, file_path2, file_path3, file_path4, file_path5, file_path6, file_path7, file_path8, file_path9, file_path10, file_path11, file_path12]
     product_list = []
     product_temp = []
 
@@ -35,6 +43,8 @@ if __name__ == "__main__":
         else:
             product_temp = list(set(product_temp) & set(product_list))
     df = df[df['Description'].isin(product_temp)]
+
+
 
     erratic_bool = (df['Demand Pattern'] == 'Erratic')
     erratic_bool_1 = erratic_bool & (df['product_cluster'] == 0)
@@ -100,6 +110,31 @@ if __name__ == "__main__":
     mae_smooth_4 = np.round(mean_absolute_error(df[smooth_bool_4]['Quantity'], df[smooth_bool_4]['predict_Quantity']), 2)
     mae_smooth_5 = np.round(mean_absolute_error(df[smooth_bool_5]['Quantity'], df[smooth_bool_5]['predict_Quantity']), 2)
 
+    # RMSE 구하기
+    rmse = np.round(np.sqrt(mean_squared_error(df['Quantity'], df['predict_Quantity'])), 2)
+    rmse_erratic = np.round(np.sqrt(mean_squared_error(df[erratic_bool]['Quantity'], df[erratic_bool]['predict_Quantity'])), 2)
+    rmse_erratic_1 = np.round(np.sqrt(mean_squared_error(df[erratic_bool_1]['Quantity'], df[erratic_bool_1]['predict_Quantity'])), 2)
+    rmse_erratic_2 = np.round(np.sqrt(mean_squared_error(df[erratic_bool_2]['Quantity'], df[erratic_bool_2]['predict_Quantity'])), 2)
+    rmse_erratic_3 = np.round(np.sqrt(mean_squared_error(df[erratic_bool_3]['Quantity'], df[erratic_bool_3]['predict_Quantity'])), 2)
+    rmse_erratic_4 = np.round(np.sqrt(mean_squared_error(df[erratic_bool_4]['Quantity'], df[erratic_bool_4]['predict_Quantity'])), 2)
+    rmse_erratic_5 = np.round(np.sqrt(mean_squared_error(df[erratic_bool_5]['Quantity'], df[erratic_bool_5]['predict_Quantity'])), 2)
+
+    rmse_intermittent = np.round(np.sqrt(mean_squared_error(df[intermittent_bool]['Quantity'], df[intermittent_bool]['predict_Quantity'])), 2)
+
+    rmse_lumpy = np.round(np.sqrt(mean_squared_error(df[lumpy_bool]['Quantity'], df[lumpy_bool]['predict_Quantity'])), 2)
+    rmse_lumpy_1 = np.round(np.sqrt(mean_squared_error(df[lumpy_bool_1]['Quantity'], df[lumpy_bool_1]['predict_Quantity'])), 2)
+    rmse_lumpy_2 = np.round(np.sqrt(mean_squared_error(df[lumpy_bool_2]['Quantity'], df[lumpy_bool_2]['predict_Quantity'])), 2)
+    rmse_lumpy_3 = np.round(np.sqrt(mean_squared_error(df[lumpy_bool_3]['Quantity'], df[lumpy_bool_3]['predict_Quantity'])), 2)
+    rmse_lumpy_4 = np.round(np.sqrt(mean_squared_error(df[lumpy_bool_4]['Quantity'], df[lumpy_bool_4]['predict_Quantity'])), 2)
+    rmse_lumpy_5 = np.round(np.sqrt(mean_squared_error(df[lumpy_bool_5]['Quantity'], df[lumpy_bool_5]['predict_Quantity'])), 2)
+
+    rmse_smooth = np.round(np.sqrt(mean_squared_error(df[smooth_bool]['Quantity'], df[smooth_bool]['predict_Quantity'])), 2)
+    rmse_smooth_1 = np.round(np.sqrt(mean_squared_error(df[smooth_bool_1]['Quantity'], df[smooth_bool_1]['predict_Quantity'])), 2)
+    rmse_smooth_2 = np.round(np.sqrt(mean_squared_error(df[smooth_bool_2]['Quantity'], df[smooth_bool_2]['predict_Quantity'])), 2)
+    rmse_smooth_3 = np.round(np.sqrt(mean_squared_error(df[smooth_bool_3]['Quantity'], df[smooth_bool_3]['predict_Quantity'])), 2)
+    rmse_smooth_4 = np.round(np.sqrt(mean_squared_error(df[smooth_bool_4]['Quantity'], df[smooth_bool_4]['predict_Quantity'])), 2)
+    rmse_smooth_5 = np.round(np.sqrt(mean_squared_error(df[smooth_bool_5]['Quantity'], df[smooth_bool_5]['predict_Quantity'])), 2)
+
     # MAPE 구하기
     mape = np.round(mean_absolute_percentage_error(df['Quantity'], df['predict_Quantity']), 2)
     mape_erratic = np.round(mean_absolute_percentage_error(df[erratic_bool]['Quantity'], df[erratic_bool]['predict_Quantity']), 2)
@@ -125,6 +160,7 @@ if __name__ == "__main__":
     mape_smooth_4 = np.round(mean_absolute_percentage_error(df[smooth_bool_4]['Quantity'], df[smooth_bool_4]['predict_Quantity']), 2)
     mape_smooth_5 = np.round(mean_absolute_percentage_error(df[smooth_bool_5]['Quantity'], df[smooth_bool_5]['predict_Quantity']), 2)
 
+    print(df.groupby(['Demand Pattern','product_cluster']).count())
 
     # # RMSE 구하기
     # rmse = np.round(np.sqrt(mean_squared_error(df['Quantity'], df['predict_Quantity'])), 2)

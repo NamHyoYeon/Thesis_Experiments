@@ -50,7 +50,7 @@ if __name__ == "__main__":
     print(len(df[df['Demand Pattern'] == 'Smooth']['Description'].unique()))
 
     df = df[['Description','Quantity','0_cluster','1_cluster','2_cluster','3_cluster','4_cluster','Demand Pattern']]
-    df.to_csv('./data/df_tgt.csv')
+    df.to_csv('./data/df_tgt_temp.csv')
 
     # product_final = df['Description'].unique()
     #
