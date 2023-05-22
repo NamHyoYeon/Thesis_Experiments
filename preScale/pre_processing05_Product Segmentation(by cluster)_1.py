@@ -53,7 +53,8 @@ if __name__ == "__main__":
                 group_cluster = df_tgt.groupby(['YYYYMM','Description'])['Quantity'].sum().reset_index()
                 group_cluster.set_index('YYYYMM', inplace=True)
                 product_list_for = group_cluster['Description'].unique()
-                cluster_df = look_back_df(product_list_for,group_cluster,2)
+                # 최근 6개월 구매량으로 클러스터 확인
+                cluster_df = look_back_df(product_list_for,group_cluster,6)
 
                 kmeans = KMeans(n_clusters=5)
                 kmeans.fit(cluster_df[['bf_1_Quantity','bf_2_Quantity']])
@@ -70,11 +71,6 @@ if __name__ == "__main__":
     df_final_temp = df_final_temp[['YYYYMM','Description','Quantity','Demand Pattern','product_cluster']]
 
     df_final= df_final[['YYYYMM','Description','Quantity','Demand Pattern','product_cluster']]
-    df_final.groupy('Description','product_cluster').count()
-
-    df_no_duplicates = df_final.drop_duplicates('Description','product_cluster')
-
-    print(df_final.info())
 
     df_final = pd.concat([df_final,df_final_temp], axis=0)
     df_final_temp = df_final.groupby(['Description','product_cluster']).count().reset_index()
@@ -86,8 +82,6 @@ if __name__ == "__main__":
     print(df_final)
 
     df_final.to_csv(r'./data/df_tgt.csv')
-
-
 
 
 

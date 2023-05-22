@@ -7,7 +7,7 @@ import datetime
 from sklearn.preprocessing import MinMaxScaler
 from xgboost import XGBRegressor
 
-file_path = './data/df_tgt_2.csv'
+file_path = './data/df_tgt.csv'
 
 if __name__ == "__main__":
     df = pd.read_csv(file_path)

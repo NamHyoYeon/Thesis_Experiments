@@ -28,8 +28,8 @@ if __name__ == "__main__":
         print(demand_pattern)
         df_tgt = df_tgt[
             ['Description', 'Quantity']]
-        # 마지막에서 3번째 까지
-        index_list = df_tgt.index.to_list()[:-2]
+        # 마지막에서 4번째 까지
+        index_list = df_tgt.index.to_list()[:-3]
         max_index = index_list[-1]
 
         df_input = pd.DataFrame()
@@ -85,10 +85,10 @@ if __name__ == "__main__":
     df_val = df_val[df_val['Quantity'] >= 1]
     df_val = df_val[df_val['predict_Quantity'] >= 0]
 
-    #df_val.to_csv('./data/result/xgboost3_lookback_2.csv')
-    #df_val.to_csv('./data/result/xgboost3_lookback_3.csv')
-    #df_val.to_csv('./data/result/xgboost3_lookback_4.csv')
-    df_val.to_csv('./data/result/xgboost3_lookback_5.csv')
+    #df_val.to_csv('./data/result/xgboost4_lookback_2.csv')
+    #df_val.to_csv('./data/result/xgboost4_lookback_3.csv')
+    #df_val.to_csv('./data/result/xgboost4_lookback_4.csv')
+    df_val.to_csv('./data/result/xgboost4_lookback_5.csv')
 
 
 

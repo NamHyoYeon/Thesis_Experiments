@@ -19,16 +19,20 @@ file_path9 = './data/result/xgboost3_lookback_2.csv'
 file_path10 = './data/result/xgboost3_lookback_3.csv'
 file_path11 = './data/result/xgboost3_lookback_4.csv'
 file_path12 = './data/result/xgboost3_lookback_5.csv'
+file_path13 = './data/result/xgboost4_lookback_2.csv'
+file_path14 = './data/result/xgboost4_lookback_3.csv'
+file_path15 = './data/result/xgboost4_lookback_4.csv'
+file_path16 = './data/result/xgboost4_lookback_5.csv'
 
 def mean_absolute_percentage_error(y_true, y_pred):
     return np.mean(np.abs((y_true - y_pred) / np.abs(y_true))*100)
 
 if __name__ == "__main__":
-    df = pd.read_csv(file_path4)
+    df = pd.read_csv(file_path13)
     df = df[~df['predict_Quantity'].isna()]
     df['predict_Quantity'] = df['predict_Quantity'].astype(int)
 
-    file_list = [file_path1, file_path2, file_path3, file_path4, file_path5, file_path6, file_path7, file_path8, file_path9, file_path10, file_path11, file_path12]
+    file_list = [file_path1, file_path2, file_path3, file_path4, file_path5, file_path6, file_path7, file_path8, file_path9, file_path10, file_path11, file_path12, file_path13, file_path14, file_path15, file_path16]
     product_list = []
     product_temp = []
 
@@ -43,8 +47,6 @@ if __name__ == "__main__":
         else:
             product_temp = list(set(product_temp) & set(product_list))
     df = df[df['Description'].isin(product_temp)]
-
-
 
     erratic_bool = (df['Demand Pattern'] == 'Erratic')
     erratic_bool_1 = erratic_bool & (df['product_cluster'] == 0)
@@ -160,6 +162,7 @@ if __name__ == "__main__":
     mape_smooth_4 = np.round(mean_absolute_percentage_error(df[smooth_bool_4]['Quantity'], df[smooth_bool_4]['predict_Quantity']), 2)
     mape_smooth_5 = np.round(mean_absolute_percentage_error(df[smooth_bool_5]['Quantity'], df[smooth_bool_5]['predict_Quantity']), 2)
 
+    print(df.groupby(['Demand Pattern']).count())
     print(df.groupby(['Demand Pattern','product_cluster']).count())
 
     # # RMSE 구하기

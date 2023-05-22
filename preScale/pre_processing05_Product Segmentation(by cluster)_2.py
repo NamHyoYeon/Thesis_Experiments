@@ -15,7 +15,6 @@ def look_back_df(look_back_product, look_df, look_back):
         print(look_df_tgt.head())
         look_df_tgt = look_df_tgt[
             ['Description', 'Quantity']]
-        # 마지막에서 두번째 까지
         index_list = look_df_tgt.index.to_list()[:-1]
         max_index = index_list[-1]
 
